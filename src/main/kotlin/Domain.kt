@@ -24,7 +24,10 @@ data class UserWithLastLogin(
         val userId: Long,
         val lastLoginAt: OffsetDateTime,
 ){
-    companion object
+    companion object{
+        fun from(user: User, record: LoginRecord): UserWithLastLogin =
+            UserWithLastLogin( user.id, record.loginAt )
+    }
 }
 
 
@@ -47,20 +50,13 @@ fun getUsersWithLastLogin(
         // ↓ この内部ループが問題
         // - 毎回リスト全体を探索（O(m)）
         // - マッチングロジックを単独でテストできない
-        loginRecords.firstOrNull { it.userId == user.id }
+        loginRecords.lastOrNull() { it.userId == user.id }
             ?.let { record ->
-                UserWithLastLogin(
-                    userId = user.id,
-                    lastLoginAt = record.loginAt,
-                )
-//                UserWithLastLogin.from(user, record)
+                UserWithLastLogin.from(user, record)
             }
     }
 }
 
-fun UserWithLastLogin.Companion.from(user: User, record: LoginRecord): UserWithLastLogin {
-    TODO()
-}
 
 // ============================================
 // AFTER: O(n)版 - テストしやすい実装
