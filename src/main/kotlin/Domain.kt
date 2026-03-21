@@ -47,11 +47,9 @@ fun getUsersWithLastLogin(
         loginRecords: List<LoginRecord>
 ): List<UserWithLastLogin> {
 
-    val pairs = matching(users, loginRecords)
+    val latestLoginMap = latestLoginEachUser(loginRecords)
 
-    return pairs.map { (user, record) ->
-        UserWithLastLogin.from(user, record)
-    }
+    return logins(users, latestLoginMap)
 
 //    return users.mapNotNull { user ->
 //        // ↓ この内部ループが問題
@@ -63,6 +61,27 @@ fun getUsersWithLastLogin(
 //                UserWithLastLogin.from(user, record)
 //            }
 //    }
+}
+
+fun logins(
+        users: List<User>,
+        latestLoginMap: Map<Long, LoginRecord>
+): List<UserWithLastLogin> {
+    return users
+        .associateBy { it.id }
+        .mapNotNull { (id, user) ->
+            latestLoginMap[id]?.let { record ->
+                UserWithLastLogin.from(user, record)
+            }
+        }
+}
+
+fun latestLoginEachUser(loginRecords: List<LoginRecord>): Map<Long, LoginRecord> {
+    return loginRecords
+        .groupBy { it.userId }
+        .mapValues { (l, records) ->
+            records.maxBy { it.loginAt }
+        }
 }
 
 fun matching(
