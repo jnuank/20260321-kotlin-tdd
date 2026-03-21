@@ -47,13 +47,7 @@ fun getUsersWithLastLogin(
         loginRecords: List<LoginRecord>
 ): List<UserWithLastLogin> {
 
-    val userMap = users.associateBy { it.id }
-    val loginRecordMap = loginRecords
-        .groupBy { it.userId }
-        .mapValues { (_, records) -> records.maxBy { it.loginAt } }
-    val pairs = loginRecordMap.mapNotNull { (userId, record) ->
-        userMap[userId]?.let { user -> user to record}
-    }
+    val pairs = matching(users, loginRecords)
 
     return pairs.map { (user, record) ->
         UserWithLastLogin.from(user, record)
@@ -69,6 +63,20 @@ fun getUsersWithLastLogin(
 //                UserWithLastLogin.from(user, record)
 //            }
 //    }
+}
+
+fun matching(
+        users: List<User>,
+        loginRecords: List<LoginRecord>
+): List<Pair<User, LoginRecord>> {
+    val userMap = users.associateBy { it.id }
+    val loginRecordMap = loginRecords
+        .groupBy { it.userId }
+        .mapValues { (_, records) -> records.maxBy { it.loginAt } }
+    val pairs = loginRecordMap.mapNotNull { (userId, record) ->
+        userMap[userId]?.let { user -> user to record }
+    }
+    return pairs
 }
 
 
