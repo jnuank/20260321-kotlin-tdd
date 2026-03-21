@@ -21,9 +21,8 @@ data class LoginRecord(
 )
 
 data class UserWithLastLogin(
-        val user: User,
+        val userId: Long,
         val lastLoginAt: OffsetDateTime,
-        val ipAddress: String
 ){
     companion object
 }
@@ -50,7 +49,11 @@ fun getUsersWithLastLogin(
         // - マッチングロジックを単独でテストできない
         loginRecords.firstOrNull { it.userId == user.id }
             ?.let { record ->
-                UserWithLastLogin.from(user, record)
+                UserWithLastLogin(
+                    userId = user.id,
+                    lastLoginAt = record.loginAt,
+                )
+//                UserWithLastLogin.from(user, record)
             }
     }
 }
@@ -106,9 +109,8 @@ object UserServiceAfter {
         return users.mapNotNull { user ->
             loginRecordMap[user.id]?.let { record ->
                 UserWithLastLogin(
-                    user = user,
+                    userId = user.id,
                     lastLoginAt = record.loginAt,
-                    ipAddress = record.ipAddress
                 )
             }
         }

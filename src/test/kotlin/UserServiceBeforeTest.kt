@@ -6,57 +6,29 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.OffsetDateTime
 
-class UserServiceBeforeTest {
+class UserLoginRecordTest {
     @Test
     fun 各ユーザーの最終ログイン履歴を取得する() {
-        val users = listOf(
-            User(
-                id = 1L,
-                name = "ユーザー1",
-                email = "user1@example.com"
-            ),
-            User(
-                id = 2L,
-                name = "ユーザー2",
-                email = "user2@example.com"
-            )
-        )
+        val user1 = User(id = 1L, name = "ユーザー1", email = "user1@example.com")
+        val user2 = User(id = 2L, name = "ユーザー2", email = "user2@example.com")
+        val users = listOf(user1, user2)
 
         val loginRecords = listOf(
             LoginRecord(
-                userId = 1L,
-                loginAt = OffsetDateTime.parse("2026-01-02T10:15:30+09:00"),
-                ipAddress = "user1@example.com"
+                userId = 1L, loginAt = OffsetDateTime.parse("2026-01-02T10:15:30+09:00"), ipAddress = "192.168.1.1"
             ),
             LoginRecord(
-                userId = 2L,
-                loginAt = OffsetDateTime.parse("2026-01-22T10:15:30+09:00"),
-                ipAddress = "user2@example.com"
+                userId = 2L, loginAt = OffsetDateTime.parse("2026-01-22T10:15:30+09:00"), ipAddress = "192.168.1.2"
             ),
         )
 
-        val actual = getUsersWithLastLogin(
-            users,
-            loginRecords = loginRecords
-        )
+        val actual = getUsersWithLastLogin(users, loginRecords = loginRecords)
         val expected = listOf(
             UserWithLastLogin(
-                user = User(
-                    id = 1L,
-                    name = "ユーザー1",
-                    email = "user1@example.com"
-                ),
-                lastLoginAt = OffsetDateTime.parse("2026-01-02T10:15:30+09:00"),
-                ipAddress = "user1@example.com"
+                userId = 1L, lastLoginAt = OffsetDateTime.parse("2026-01-02T10:15:30+09:00"),
             ),
             UserWithLastLogin(
-                user = User(
-                    id = 2L,
-                    name = "ユーザー2",
-                    email = "user2@example.com"
-                ),
-                lastLoginAt = OffsetDateTime.parse("2026-01-22T10:15:30+09:00"),
-                ipAddress = "user2@example.com"
+                userId = 2L, lastLoginAt = OffsetDateTime.parse("2026-01-22T10:15:30+09:00"),
             )
         )
         assertEquals(expected, actual)
