@@ -23,10 +23,10 @@ data class LoginRecord(
 data class UserWithLastLogin(
         val userId: Long,
         val lastLoginAt: OffsetDateTime,
-){
-    companion object{
+) {
+    companion object {
         fun from(user: User, record: LoginRecord): UserWithLastLogin =
-            UserWithLastLogin( user.id, record.loginAt )
+            UserWithLastLogin(user.id, record.loginAt)
     }
 }
 
@@ -70,13 +70,12 @@ fun matching(
         loginRecords: List<LoginRecord>
 ): List<Pair<User, LoginRecord>> {
     val userMap = users.associateBy { it.id }
-    val loginRecordMap = loginRecords
+    return loginRecords
         .groupBy { it.userId }
         .mapValues { (_, records) -> records.maxBy { it.loginAt } }
-    val pairs = loginRecordMap.mapNotNull { (userId, record) ->
-        userMap[userId]?.let { user -> user to record }
-    }
-    return pairs
+        .mapNotNull { (userId, record) ->
+            userMap[userId]?.let { user -> user to record }
+        }
 }
 
 
@@ -134,89 +133,3 @@ object UserServiceAfter {
         }
     }
 }
-
-// ============================================
-// テストコード例
-// ============================================
-
-//fun main() {
-//    // テストデータ
-//    val users = listOf(
-//        User(id = 1L, name = "Alice", email = "alice@example.com"),
-//        User(id = 2L, name = "Bob", email = "bob@example.com"),
-//        User(id = 3L, name = "Charlie", email = "charlie@example.com")
-//    )
-//
-//    val loginRecords = listOf(
-//        LoginRecord(userId = 1L, loginAt = OffsetDateTime.parse("2025-01-01T10:00:00Z"), ipAddress = "192.168.1.1"),
-//        LoginRecord(userId = 2L, loginAt = OffsetDateTime.parse("2025-01-02T11:00:00Z"), ipAddress = "192.168.1.2"),
-//        // user_id=3のログインレコードは存在しない
-//    )
-//
-//    // Before版の実行
-//    println("=== BEFORE版 ===")
-//    val resultBefore = UserServiceBefore.getUsersWithLastLogin(users, loginRecords)
-//    resultBefore.forEach { println(it) }
-//
-//    // After版の実行
-//    println("\n=== AFTER版 ===")
-//    val resultAfter = UserServiceAfter.getUsersWithLastLogin(users, loginRecords)
-//    resultAfter.forEach { println(it) }
-//
-//    // 独立した関数のテスト例
-//    println("\n=== buildLoginRecordMapのテスト ===")
-//    val map = UserServiceAfter.buildLoginRecordMap(loginRecords)
-//    println("Map size: ${map.size}")
-//    println("userId=1のレコード: ${map[1L]}")
-//    println("userId=999のレコード（存在しない）: ${map[999L]}")
-//}
-
-// ============================================
-// TDD的な観点での比較
-// ============================================
-
-/**
- * BEFORE版の問題:
- *
- * - `getUsersWithLastLogin()`は一つの大きな処理
- * - 内部のマッチングロジックを単独でテストできない
- * - テストするには常に users + loginRecords の両方を用意する必要がある
- * - ロジックの変更時にテストの書き直しが必要
- *
- * 例: 「重複したuserIdがあった場合の挙動」を確認したい
- *     → users も loginRecords も用意して、getUsersWithLastLogin()全体を実行するしかない
- */
-
-/**
- * AFTER版の利点:
- *
- * - buildLoginRecordMap(): Map構築ロジックを独立してテスト可能
- *   テスト例: 重複したuserIdがあった場合、最後の要素が優先されるか？
- *
- * - mapUsersToLastLogin(): マッピングロジックを独立してテスト可能
- *   テスト例: Mapに存在しないuserIdがあった場合、結果から除外されるか？
- *
- * - 各関数が単一責任原則に従っている
- * - テストが高速（必要な部分だけテストできる）
- * - テストが読みやすい（何をテストしているか明確）
- */
-
-// ============================================
-// パフォーマンス比較（参考）
-// ============================================
-
-/**
- * データ量: users=100件, loginRecords=100件の場合
- *
- * BEFORE版（O(n × m)）:
- *   - users.mapNotNull の各要素（100回）に対して
- *   - loginRecords.firstOrNull で線形探索（最大100回）
- *   - 総操作回数: 最大 10,000回
- *
- * AFTER版（O(n + m)）:
- *   - associateBy で1回走査（100回）
- *   - mapNotNull でMap検索（100回 × O(1)）
- *   - 総操作回数: 200回
- *
- * 差: 約50倍
- */
