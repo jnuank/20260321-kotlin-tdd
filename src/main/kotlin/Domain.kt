@@ -46,37 +46,30 @@ fun getUsersWithLastLogin(
         users: List<User>,
         loginRecords: List<LoginRecord>
 ): List<UserWithLastLogin> {
-
-    val latestLoginMap = latestLoginEachUser(loginRecords)
-
-    return logins(users, latestLoginMap)
-
-//    return users.mapNotNull { user ->
-//        // ↓ この内部ループが問題
-//        // - 毎回リスト全体を探索（O(m)）
-//        // - マッチングロジックを単独でテストできない
-//        loginRecords
-//            .lastOrNull() { it.userId == user.id }
-//            ?.let { record ->
-//                UserWithLastLogin.from(user, record)
-//            }
-//    }
+    val latestLoginMap = buildLatestLoginMap(loginRecords)
+    return matchUsersWithLoginRecords(users, latestLoginMap)
+        .map { (user, record) -> UserWithLastLogin.from(user, record) }
 }
 
-fun logins(
+/**
+ * UserリストとLoginRecordのMapをマッチングし、ペアのリストを返す
+ *
+ * テスト観点:
+ * - Mapに存在しないuserIdの場合、結果リストに含まれない
+ * - Mapに存在するuserIdの場合、正しいペアが作られる
+ */
+fun matchUsersWithLoginRecords(
         users: List<User>,
         latestLoginMap: Map<Long, LoginRecord>
-): List<UserWithLastLogin> {
-    return users
-        .associateBy { it.id }
-        .mapNotNull { (id, user) ->
-            latestLoginMap[id]?.let { record ->
-                UserWithLastLogin.from(user, record)
-            }
+): List<Pair<User, LoginRecord>> {
+    return users.mapNotNull { user ->
+        latestLoginMap[user.id]?.let { record ->
+            user to record
         }
+    }
 }
 
-fun latestLoginEachUser(loginRecords: List<LoginRecord>): Map<Long, LoginRecord> {
+fun buildLatestLoginMap(loginRecords: List<LoginRecord>): Map<Long, LoginRecord> {
     return loginRecords
         .groupBy { it.userId }
         .mapValues { (l, records) ->
