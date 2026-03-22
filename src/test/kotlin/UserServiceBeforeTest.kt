@@ -116,4 +116,30 @@ class UserLoginRecordTest {
         assertEquals(expected, actual)
     }
 
+    @Test
+    fun getUsersWithLastLogin_統合テスト() {
+        val user1 = User(id = 1L, name = "Alice", email = "alice@example.com")
+        val user2 = User(id = 2L, name = "Bob", email = "bob@example.com")
+        val users = listOf(user1, user2)
+
+        val record1a = LoginRecord(
+            userId = 1L, loginAt = OffsetDateTime.parse("2026-01-02T10:15:30+09:00"), ipAddress = "192.168.1.1"
+        )
+        val record1b = LoginRecord(
+            userId = 1L, loginAt = OffsetDateTime.parse("2026-02-07T03:23:45+09:00"), ipAddress = "192.168.1.1"
+        )
+        val record2 = LoginRecord(
+            userId = 2L, loginAt = OffsetDateTime.parse("2026-01-22T10:15:30+09:00"), ipAddress = "192.168.1.2"
+        )
+        val loginRecords = listOf(record1a, record1b, record2)
+
+        val actual = getUsersWithLastLogin(users, loginRecords)
+
+        val expected = listOf(
+            UserWithLastLogin(userId = 1L, lastLoginAt = OffsetDateTime.parse("2026-02-07T03:23:45+09:00")),
+            UserWithLastLogin(userId = 2L, lastLoginAt = OffsetDateTime.parse("2026-01-22T10:15:30+09:00"))
+        )
+        assertEquals(expected, actual)
+    }
+
 }
