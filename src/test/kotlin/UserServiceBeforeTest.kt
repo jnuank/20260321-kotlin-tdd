@@ -2,7 +2,6 @@ import org.example.LoginRecord
 import org.example.User
 import org.example.UserWithLastLogin
 import org.example.latestLoginEachUser
-import org.example.matching
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.OffsetDateTime
