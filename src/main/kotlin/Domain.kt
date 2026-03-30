@@ -38,7 +38,8 @@ fun getUsersWithLastLogin2(
     loginRecords: List<LoginRecord>
 ): List<UserWithLastLogin> {
     val list = users.flatMap { user ->
-        loginRecords.map { loginRecord -> UserWithLastLogin.from(user, loginRecord) }
+        loginRecords.filter { it.userId == user.id }
+            .map { loginRecord -> UserWithLastLogin.from(user, loginRecord) }
     }
     return list
 }

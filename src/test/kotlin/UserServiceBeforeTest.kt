@@ -150,7 +150,7 @@ class UserLoginRecordTest {
     @Nested
     inner class `2パターン目` {
         @Test
-        fun getUsersWithLastLogin2Test() {
+        fun ふたつのリストをもらって生成する() {
 
             val expect = listOf(
                 UserWithLastLogin(
@@ -159,10 +159,59 @@ class UserLoginRecordTest {
                 )
             )
 
-            val users = listOf( User( id = 1L, name = "", email = "" ) )
-            val loginRecords = listOf(LoginRecord(
-                userId = 1L, loginAt = OffsetDateTime.parse("2026-01-02T10:15:30+09:00"), ipAddress = ""
-            ))
+            val users = listOf(User(id = 1L, name = "", email = ""))
+            val loginRecords = listOf(
+                LoginRecord(
+                    userId = 1L, loginAt = OffsetDateTime.parse("2026-01-02T10:15:30+09:00"), ipAddress = ""
+                )
+            )
+            val actual = getUsersWithLastLogin2(users, loginRecords)
+            assertEquals(expect, actual)
+        }
+
+        /*
+        * usersが         loginRecordsが
+        *  - 単一の場合     単一の場合
+        *  - 単一の場合     複数の場合
+        *  - 単一の場合     空の場合
+        *  - 複数の場合     単一の場合
+        *  - 複数の場合     複数の場合
+        *  - 複数の場合     空の場合
+        *  - 空の場合      単一の場合
+        *  - 空の場合      複数の場合
+        *  - 空の場合      空の場合
+        *
+        * 大体9パターン
+        *
+        * */
+        @Test
+        fun userIdが一致するものだけ生成する() {
+
+            val expect = listOf(
+                UserWithLastLogin(
+                    userId = 2L, lastLoginAt = OffsetDateTime.parse("2026-02-01T10:15:30+09:00")
+                ),
+                UserWithLastLogin(
+                    userId = 4L, lastLoginAt = OffsetDateTime.parse("2026-04-01T10:15:30+09:00")
+                ),
+            )
+
+            val users = listOf(
+                User(id = 2L, name = "", email = ""),
+                User(id = 3L, name = "", email = ""),
+                User(id = 4L, name = "", email = ""),
+            )
+            val loginRecords = listOf(
+                LoginRecord(
+                    userId = 1L, loginAt = OffsetDateTime.parse("2026-01-01T10:15:30+09:00"), ipAddress = ""
+                ),
+                LoginRecord(
+                    userId = 2L, loginAt = OffsetDateTime.parse("2026-02-01T10:15:30+09:00"), ipAddress = ""
+                ),
+                LoginRecord(
+                    userId = 4L, loginAt = OffsetDateTime.parse("2026-04-01T10:15:30+09:00"), ipAddress = ""
+                ),
+            )
             val actual = getUsersWithLastLogin2(users, loginRecords)
             assertEquals(expect, actual)
         }
