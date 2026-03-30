@@ -1,3 +1,5 @@
+import io.mockk.every
+import io.mockk.mockk
 import org.example.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Nested
@@ -187,15 +189,6 @@ class UserLoginRecordTest {
         @Test
         fun userIdが一致するものだけ生成する() {
 
-            val expect = listOf(
-                UserWithLastLogin(
-                    userId = 2L, lastLoginAt = OffsetDateTime.parse("2026-02-01T10:15:30+09:00")
-                ),
-                UserWithLastLogin(
-                    userId = 4L, lastLoginAt = OffsetDateTime.parse("2026-04-01T10:15:30+09:00")
-                ),
-            )
-
             val users = listOf(
                 User(id = 2L, name = "", email = ""),
                 User(id = 3L, name = "", email = ""),
@@ -213,6 +206,40 @@ class UserLoginRecordTest {
                 ),
             )
             val actual = getUsersWithLastLogin2(users, loginRecords)
+
+            val expect = listOf(
+                UserWithLastLogin(
+                    userId = 2L, lastLoginAt = OffsetDateTime.parse("2026-02-01T10:15:30+09:00")
+                ),
+                UserWithLastLogin(
+                    userId = 4L, lastLoginAt = OffsetDateTime.parse("2026-04-01T10:15:30+09:00")
+                ),
+            )
+
+            assertEquals(expect, actual)
+        }
+
+        @Test
+        fun userIdが一致するものだけを生成２() {
+            val user1 = mockk<User>()
+            val user2 = mockk<User>()
+            val user3 = mockk<User>()
+            val users = listOf(user1, user2, user3)
+
+            val loginRecords = mockk<List<LoginRecord>>()
+
+            val userWithLastLogin1 = mockk<UserWithLastLogin>()
+            val userWithLastLogin3 = mockk<UserWithLastLogin>()
+            every { loginRecords.logins(user1) } returns userWithLastLogin1
+            every { loginRecords.logins(user2) } returns null
+            every { loginRecords.logins(user3) } returns userWithLastLogin3
+
+            val actual = getUsersWithLastLogin2(users, loginRecords)
+
+            val expect = listOf(
+                userWithLastLogin1,
+                userWithLastLogin3,
+            )
             assertEquals(expect, actual)
         }
     }
