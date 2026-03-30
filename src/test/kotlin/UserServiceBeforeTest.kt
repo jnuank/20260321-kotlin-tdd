@@ -147,4 +147,27 @@ class UserLoginRecordTest {
         }
     }
 
+    @Nested
+    inner class `2パターン目` {
+        @Test
+        fun getUsersWithLastLogin2Test() {
+
+            val expect = listOf(
+                UserWithLastLogin(
+                    userId = 1L,
+                    lastLoginAt = OffsetDateTime.parse("2026-01-02T10:15:30+09:00")
+                )
+            )
+
+            val users = listOf( User( id = 1L, name = "", email = "" ) )
+            val loginRecords = listOf(LoginRecord(
+                userId = 1L, loginAt = OffsetDateTime.parse("2026-01-02T10:15:30+09:00"), ipAddress = ""
+            ))
+            val actual = getUsersWithLastLogin2(users, loginRecords)
+            assertEquals(expect, actual)
+        }
+
+
+    }
+
 }

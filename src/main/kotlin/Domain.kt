@@ -33,6 +33,16 @@ fun getUsersWithLastLogin(
         .map { (user, record) -> UserWithLastLogin.from(user, record) }
 }
 
+fun getUsersWithLastLogin2(
+    users: List<User>,
+    loginRecords: List<LoginRecord>
+): List<UserWithLastLogin> {
+    val list = users.flatMap { user ->
+        loginRecords.map { loginRecord -> UserWithLastLogin.from(user, loginRecord) }
+    }
+    return list
+}
+
 fun matchUsersWithLoginRecords(
         users: List<User>,
         latestLoginMap: Map<Long, LoginRecord>
