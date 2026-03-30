@@ -1,13 +1,7 @@
 package org.example
 
-// ============================================
-// ブログ記事用サンプルコード
-// テーマ: TDDのしづらさからリファクタリングへ
-// ============================================
-
 import java.time.OffsetDateTime
 
-// ドメインモデル
 data class User(
         val id: Long,
         val name: String,
