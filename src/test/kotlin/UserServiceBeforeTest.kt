@@ -215,8 +215,5 @@ class UserLoginRecordTest {
             val actual = getUsersWithLastLogin2(users, loginRecords)
             assertEquals(expect, actual)
         }
-
-
     }
-
 }
